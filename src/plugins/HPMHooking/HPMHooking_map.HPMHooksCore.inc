@@ -192,6 +192,8 @@ struct {
 	struct HPMHookPoint *HP_battle_config_read_post;
 	struct HPMHookPoint *HP_battle_config_set_defaults_pre;
 	struct HPMHookPoint *HP_battle_config_set_defaults_post;
+	struct HPMHookPoint *HP_battle_config_set_value_sub_pre;
+	struct HPMHookPoint *HP_battle_config_set_value_sub_post;
 	struct HPMHookPoint *HP_battle_config_set_value_pre;
 	struct HPMHookPoint *HP_battle_config_set_value_post;
 	struct HPMHookPoint *HP_battle_config_get_value_pre;
@@ -6077,6 +6079,8 @@ struct {
 	int HP_battle_config_read_post;
 	int HP_battle_config_set_defaults_pre;
 	int HP_battle_config_set_defaults_post;
+	int HP_battle_config_set_value_sub_pre;
+	int HP_battle_config_set_value_sub_post;
 	int HP_battle_config_set_value_pre;
 	int HP_battle_config_set_value_post;
 	int HP_battle_config_get_value_pre;
