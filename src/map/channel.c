@@ -640,30 +640,25 @@ void read_channels_config(void)
 			const char *irc_server, *irc_channel,
 				 *irc_nick, *irc_nick_pw;
 			int irc_use_ghost = 0;
-			if( libconfig->setting_lookup_string(settings, "irc_channel_network", &irc_server) ) {
-				if( !strstr(irc_server,":") ) {
-					channel->config->irc = false;
-					ShowWarning("channels.conf : network port wasn't found in 'irc_channel_network', disabling irc channel...\n");
-				} else {
-					unsigned char d = 0, dlen = strlen(irc_server);
-					char server[40];
-					if (dlen > 39)
-						dlen = 39;
-					memset(server, '\0', sizeof(server));
-
-					for(d = 0; d < dlen; d++) {
-						if(irc_server[d] == ':') {
-							memcpy(server, irc_server, d);
-							safestrncpy(channel->config->irc_server, server, 40);
-							memcpy(server, &irc_server[d+1], dlen - d - 1);
-							channel->config->irc_server_port = atoi(server);
-							break;
-						}
-					}
-				}
-			} else {
+			if (!libconfig->setting_lookup_string(settings, "irc_channel_network", &irc_server)) {
 				channel->config->irc = false;
 				ShowWarning("channels.conf : irc channel enabled but irc_channel_network wasn't found, disabling irc channel...\n");
+			} else {
+				char *server = aStrdup(irc_server);
+				char *port = strchr(server, ':');
+				if (port == NULL) {
+					channel->config->irc = false;
+					ShowWarning("channels.conf: network port wasn't found in 'irc_channel_network', disabling irc channel...\n");
+				} else if ((port-server) > sizeof channel->config->irc_server - 1) {
+					channel->config->irc = false;
+					ShowWarning("channels.conf: server name is too long in 'irc_channel_network', disabling irc channel...\n");
+				} else {
+					*port = '\0';
+					port++;
+					safestrncpy(channel->config->irc_server, server, sizeof channel->config->irc_server);
+					channel->config->irc_server_port = atoi(port);
+				}
+				aFree(server);
 			}
 			if( libconfig->setting_lookup_string(settings, "irc_channel_channel", &irc_channel) )
 				safestrncpy(channel->config->irc_channel, irc_channel, 50);
