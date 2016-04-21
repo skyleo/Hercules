@@ -11971,7 +11971,7 @@ void clif_parse_PartyMessage(int fd, struct map_session_data *sd)
 	if (clif->process_chat_message(sd, packet, message, sizeof message) == NULL)
 		return;
 
-	party->send_message(sd, message, (int)strlen(message));
+	party->send_message(sd, message);
 }
 
 void clif_parse_PartyChangeLeader(int fd, struct map_session_data* sd) __attribute__((nonnull (2)));
@@ -13070,9 +13070,9 @@ void clif_parse_GuildMessage(int fd, struct map_session_data *sd)
 		return;
 
 	if (sd->bg_id)
-		bg->send_message(sd, message, (int)strlen(message));
+		bg->send_message(sd, message);
 	else
-		guild->send_message(sd, message, (int)strlen(message));
+		guild->send_message(sd, message);
 }
 
 void clif_parse_GuildRequestAlliance(int fd, struct map_session_data *sd) __attribute__((nonnull (2)));
@@ -16136,17 +16136,20 @@ void clif_bg_xy_remove(struct map_session_data *sd)
 
 /// Notifies clients of a battleground message (ZC_BATTLEFIELD_CHAT).
 /// 02dc <packet len>.W <account id>.L <name>.24B <message>.?B
-void clif_bg_message(struct battleground_data *bgd, int src_id, const char *name, const char *mes, size_t len)
+void clif_bg_message(struct battleground_data *bgd, int src_id, const char *name, const char *mes)
 {
 	struct map_session_data *sd;
 	unsigned char *buf;
+	int len;
 
 	nullpo_retv(bgd);
 	nullpo_retv(name);
 	nullpo_retv(mes);
-	if( !bgd->count || (sd = bg->getavailablesd(bgd)) == NULL )
+
+	if (!bgd->count || (sd = bg->getavailablesd(bgd)) == NULL)
 		return;
 
+	len = (int)strlen(mes);
 	buf = (unsigned char*)aMalloc((len + NAME_LENGTH + 8)*sizeof(unsigned char));
 
 	WBUFW(buf,0) = 0x2dc;
@@ -16178,7 +16181,7 @@ void clif_parse_BattleChat(int fd, struct map_session_data *sd)
 	if (clif->process_chat_message(sd, packet, message, sizeof message) == NULL)
 		return;
 
-	bg->send_message(sd, message, (int)strlen(message));
+	bg->send_message(sd, message);
 }
 
 /// Notifies client of a battleground score change (ZC_BATTLEFIELD_NOTIFY_POINT).
