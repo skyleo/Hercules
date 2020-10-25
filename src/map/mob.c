@@ -625,7 +625,7 @@ static int mob_once_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y
 
 			if (gc != NULL) {
 				struct guild *g = guild->search(gc->guild_id);
-				
+
 				md->guardian_data = (struct guardian_data*)aCalloc(1, sizeof(struct guardian_data));
 				md->guardian_data->castle = gc;
 				md->guardian_data->number = MAX_GUARDIANS;
@@ -2491,6 +2491,7 @@ static int mob_dead(struct mob_data *md, struct block_list *src, int type)
 	}
 
 	if( !(type&2) //No exp
+	 && !md->db->noexp
 	 && (!map->list[m].flag.pvp || battle_config.pvp_exp) //Pvp no exp rule [MouseJstr]
 	 && (!md->master_id || md->special_state.ai == AI_NONE) //Only player-summoned mobs do not give exp. [Skotlex]
 	 && (!map->list[m].flag.nobaseexp || !map->list[m].flag.nojobexp) //Gives Exp
@@ -2617,7 +2618,7 @@ static int mob_dead(struct mob_data *md, struct block_list *src, int type)
 
 	} //End EXP giving.
 
-	if( !(type&1) && !map->list[m].flag.nomobloot && !md->state.rebirth && (
+	if ((type & 1) == 0 && !map->list[m].flag.nomobloot && !md->db->nodrops && !md->state.rebirth && (
 		md->special_state.ai == AI_NONE || //Non special mob
 		battle_config.alchemist_summon_reward == 2 || //All summoned give drops
 		(md->special_state.ai == AI_SPHERE && battle_config.alchemist_summon_reward == 1) //Marine Sphere Drops items.
@@ -4893,6 +4894,8 @@ static int mob_read_db_sub(struct config_setting_t *mobt, int n, const char *sou
 	 * Size: size
 	 * Race: race
 	 * Element: (type, level)
+	 * NoDrops: true/false
+	 * NoExp: true/false
 	 * Mode: {
 	 *     CanMove: true/false
 	 *     Looter: true/false
@@ -5097,6 +5100,14 @@ static int mob_read_db_sub(struct config_setting_t *mobt, int n, const char *sou
 	} else if (!inherit) {
 		md.status.def_ele = ELE_NEUTRAL;
 		md.status.ele_lv = 1;
+	}
+
+	if ((t = libconfig->setting_get_member(mobt, "NoDrops"))) {
+		md.nodrops = libconfig->setting_get_bool(t);
+	}
+
+	if ((t = libconfig->setting_get_member(mobt, "NoExp"))) {
+		md.noexp = libconfig->setting_get_bool(t);
 	}
 
 	if ((t = libconfig->setting_get_member(mobt, "Mode"))) {

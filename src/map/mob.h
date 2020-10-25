@@ -203,6 +203,8 @@ struct mob_db {
 	struct status_data status;
 	struct view_data vd;
 	unsigned int option;
+	bool noexp; ///< Don't give any exp, not even a bonus
+	bool nodrops; ///< Don't give any drops, not even boni such as Mimic Card
 	int summonper[MAX_RANDOMMONSTER];
 	int maxskill;
 	int dmg_taken_rate;
